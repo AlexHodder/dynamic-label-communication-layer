@@ -51,8 +51,8 @@ let prepare_message1 generator sender =
   let msg1 : message1 = {secret} in
 
   // reveal the secret
-  trigger_reveal_event generator generator i;*
-  trigger_reveal_event generator sender i;*
+  trigger_reveal_bytes_event generator generator secret;*
+  trigger_reveal_bytes_event generator sender secret;*
 
   trigger_event generator (GeneratorSendMsg generator sender msg1);*
   let* state_id = new_session_id generator in

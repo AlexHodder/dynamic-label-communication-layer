@@ -137,15 +137,15 @@ let prepare_message1_proof tr generator sender =
   reveal_opaque (`%mk_rand) (mk_rand);
   let (i, tr) = get_time tr in
   let (secret, tr) = mk_rand NoUsage (reveal_principal_label i) 32 tr in
+ 
+  let (_, tr') = trigger_reveal_bytes_event generator generator secret tr in
 
-  let (_, tr') = trigger_reveal_event generator generator i tr in
-  trigger_reveal_event_trace_invariant reveal_event_pred generator generator i tr;
-  trigger_reveal_event_reveal_event_triggered generator generator i tr;
+  trigger_reveal_bytes_event_lemma tr generator generator secret;
   reveal_principal_label_can_flow_to_principal_label tr' generator generator i;
+ 
+  let (_, tr'') = trigger_reveal_bytes_event generator sender secret tr' in
 
-  let (_, tr'') = trigger_reveal_event generator sender i tr' in
-  trigger_reveal_event_trace_invariant reveal_event_pred generator sender i tr';
-  trigger_reveal_event_reveal_event_triggered generator sender i tr';
+  trigger_reveal_bytes_event_lemma tr' generator sender secret;
   reveal_principal_label_can_flow_to_principal_label tr'' generator sender i
 
 #push-options "--ifuel 3"
