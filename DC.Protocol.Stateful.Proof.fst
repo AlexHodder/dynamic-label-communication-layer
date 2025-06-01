@@ -201,8 +201,7 @@ let receive_message1_and_prepare_message2_proof tr comm_keys_ids sender receiver
 
         let (_, tr'') = trigger_event sender (SenderSendMsg sender receiver msg2) tr' in
 
-        // something to prove - should be possible, as secret is contained in the msg.
-        assume(is_publishable tr' (serialize message msg) ==> is_publishable tr' secret);
+        FStar.Classical.move_requires (parse_wf_lemma message (is_publishable tr')) (serialize message msg);
 
         assert(is_knowable_by (comm_label sender receiver) tr'' secret \/ is_publishable tr'' (serialize message msg));
         
