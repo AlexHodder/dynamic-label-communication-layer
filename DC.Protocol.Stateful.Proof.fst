@@ -90,7 +90,7 @@ let comm_layer_event_preds = {
 }
 
 let reveal_event_pred : reveal_event_predicate =
-  fun tr prin e -> True
+  default_reveal_event_predicate #crypto_invariants_protocol
 
 let all_events = [
   event_predicate_communication_layer_and_tag comm_layer_event_preds;
@@ -131,12 +131,27 @@ let prepare_message1_proof tr generator sender =
   reveal_opaque (`%mk_rand) (mk_rand);
   let (i, tr) = get_time tr in
   let (secret, tr) = mk_rand NoUsage (reveal_principal_label i) 32 tr in
- 
-  let (_, tr') = trigger_reveal_bytes_event generator generator secret tr in
 
+  assert(
+    exists (b:bytes) (l:pos).
+      b == Rand l i
+  ); // seem to need these asserts to prove the reveal_event predicates (maybe tweaking fuel might help these.)
+  
+  assert(default_reveal_event_predicate #crypto_invariants_protocol tr generator {to=generator; point=i;});
+
+  let (_, tr') = trigger_reveal_bytes_event generator generator secret tr in
+  assert(trace_invariant tr');
+  
   trigger_reveal_bytes_event_lemma tr generator generator secret;
   reveal_principal_label_can_flow_to_principal_label tr' generator generator i;
- 
+
+  assert(
+    exists (l:pos).
+      is_knowable_by (principal_label generator) tr' secret /\
+      secret == Rand l i
+  );
+
+  assert(default_reveal_event_predicate #crypto_invariants_protocol tr' generator {to=sender; point=i;});
   let (_, tr'') = trigger_reveal_bytes_event generator sender secret tr' in
 
   trigger_reveal_bytes_event_lemma tr' generator sender secret;
@@ -181,6 +196,9 @@ let receive_message1_and_prepare_message2_proof tr comm_keys_ids sender receiver
       match guard_tr(Rand? secret) tr with
       | (Some _, tr) -> (
         let i = Rand?.time msg2.secret in
+
+        assert(default_reveal_event_predicate #crypto_invariants_protocol tr sender {to=receiver; point=i;});
+
         let (_, tr') = trigger_reveal_bytes_event sender receiver secret tr in
 
         trigger_reveal_bytes_event_lemma tr sender receiver secret;
