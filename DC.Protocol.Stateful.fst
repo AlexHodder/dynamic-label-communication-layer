@@ -76,7 +76,7 @@ let receive_message1_and_prepare_message2 comm_keys_ids sender receiver msg_id =
   let msg2 : message2 = {secret=msg1.secret} in
 
   guard_tr(Rand? msg1.secret);*?
-  trigger_reveal_event sender receiver (Rand?.time msg1.secret);*
+  trigger_reveal_bytes_event sender receiver msg1.secret;*
 
   trigger_event sender (SenderSendMsg sender receiver msg2);*
 
