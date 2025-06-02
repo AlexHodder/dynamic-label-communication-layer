@@ -67,15 +67,9 @@ let event_predicate_protocol: event_predicate dc_event =
       is_knowable_by (join (principal_label generator) (principal_label sender)) tr msg.secret
     )
     | SenderSendMsg sender receiver msg -> (
-      // exists generator. is_knowable_by (comm_label generator sender) tr msg.secret /\ event_triggered tr sender (CommConfReceiveMsg sender (serialize message (Msg2 msg)))
       True
     )
     | ReceiverReceivedMsg receiver msg -> (
-      // (exists payload. event_triggered tr receiver (CommConfAuthReceiveMsg sender receiver payload)) /\
-      // (
-      //   event_triggered tr sender (SenderSendMsg sender receiver msg) \/
-      //   is_corrupt tr (long_term_key_label sender)
-      // )
       True
     )
 
